@@ -1,0 +1,37 @@
+{% set name = "nbresuse" %}
+{% set version = "0.4.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/albertdefusco/{{ name }}/archive/{{ version }}.tar.gz
+
+build:
+  number: 0
+  noarch: python
+  script: "{{ PYTHON }} -m pip install . --no-deps -vv"
+
+requirements:
+  host:
+    - python
+    - pip
+  run:
+    - python
+    - notebook
+
+test:
+  imports:
+    - nbresuse
+
+about:
+  home: http://github.com/AlbertDeFusco/nbresuse
+  license: BSD-2-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: 'Monitor memory usage in Jupyter Notebook or JupyterLab. This version modified to read usage and limits from CGroups.'
+
+extra:
+  recipe-maintainers:
+    - AlbertDeFusco
