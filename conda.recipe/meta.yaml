@@ -1,13 +1,12 @@
 {% set name = "nbresuse" %}
-{% set version = "0.4.2" %}
+{% set version = "0.4.4" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: ssh://git@github.com/anacondaplatform/{{ name }}.git
-  git_rev: {{ version }}
+  path: ../
 
 build:
   number: 0

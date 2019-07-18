@@ -92,7 +92,7 @@ class ResourceUseDisplay(Configurable):
     """
 
     mem_warning_threshold = Float(
-        0.1,
+        0.2,
         help="""
         Warn user with flashing lights when memory usage is within this fraction
         memory limit.
