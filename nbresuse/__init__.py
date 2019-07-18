@@ -1,11 +1,45 @@
 import os
 import json
-import psutil
+from os.path import join
 from traitlets import Float, Int, default
 from traitlets.config import Configurable
 from notebook.utils import url_path_join
 from notebook.base.handlers import IPythonHandler
 from tornado import web
+
+class CGroup(object):
+    def __init__(self):
+        # cgroups in AE5 are configured globally for the container
+        # rather than per user
+        self.path = '/sys/fs/cgroup/'
+
+
+    def _load_memory_data(self):
+        '''Load current memory usage and limit information
+        this must be called frequently to get up-to-date information.
+        '''
+        with open(join(self.path, 'memory', 'memory.stat')) as f:
+            lines = f.readlines()
+
+        return {i.split()[0]:int(i.split()[1]) for i in lines}
+
+
+    @property
+    def mem_limit(self):
+        '''CGroups memory limit in bytes'''
+
+        # don't forget to get the current values
+        m = self._load_memory_data()
+        return m['hierarchical_memory_limit']
+
+
+    @property
+    def mem_usage(self):
+        '''Current total memory usage in bytes'''
+
+        # don't forget to get the current values
+        m = self._load_memory_data()
+        return m['total_rss']
 
 
 class MetricsHandler(IPythonHandler):
@@ -15,18 +49,17 @@ class MetricsHandler(IPythonHandler):
         Calculate and return current resource usage metrics
         """
         config = self.settings['nbresuse_display_config']
-        cur_process = psutil.Process()
-        all_processes = [cur_process] + cur_process.children(recursive=True)
-        rss = sum([p.memory_info().rss for p in all_processes])
+
+        cgroup = CGroup()
+        rss = cgroup.mem_usage
 
         limits = {}
 
-        if config.mem_limit != 0:
-            limits['memory'] = {
-                'rss': config.mem_limit
-            }
-            if config.mem_warning_threshold != 0:
-                limits['memory']['warn'] = (config.mem_limit - rss) < (config.mem_limit * config.mem_warning_threshold)
+        limits['memory'] = {
+            'rss': cgroup.mem_limit
+        }
+        if config.mem_warning_threshold != 0:
+            limits['memory']['warn'] = (cgroup.mem_limit - rss) < (cgroup.mem_limit * config.mem_warning_threshold)
         metrics = {
             'rss': rss,
             'limits': limits,

@@ -3,13 +3,12 @@ import setuptools
 
 setuptools.setup(
     name="nbresuse",
-    version='0.3.2',
-    url="https://github.com/yuvipanda/nbresuse",
+    version='0.4.0',
+    url="https://github.com/albertdefusco/nbresuse",
     author="Yuvi Panda",
     description="Simple Jupyter extension to show how much resources (RAM) your notebook is using",
     packages=setuptools.find_packages(),
     install_requires=[
-        'psutil',
         'notebook',
     ],
     data_files=[
